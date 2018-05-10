@@ -18,11 +18,13 @@ module JekyllImport
                        n.created,
                        n.status,
                        n.type,
+                       ua.dst AS permalink,
                        (SELECT GROUP_CONCAT( td.name SEPARATOR '|' ) FROM term_data td, term_node tn WHERE tn.tid = td.tid AND tn.nid = n.nid) AS 'tags',
                        (SELECT GROUP_CONCAT( af.filepath SEPARATOR '|' ) FROM audio_file af WHERE af.vid = n.nid) AS 'audiofiles',
                        (SELECT GROUP_CONCAT( fl.filepath SEPARATOR '|' ) FROM files fl WHERE fl.nid = n.nid) AS 'files'
                 FROM #{prefix}node_revisions AS nr,
                      #{prefix}node AS n
+                     LEFT OUTER JOIN #{prefix}url_alias AS ua ON ua.src = CONCAT('node/', n.nid)
                 WHERE (#{types})
                   AND n.vid = nr.vid
                 GROUP BY n.nid
@@ -38,6 +40,7 @@ EOS
       def self.post_data(sql_post_data)
         content = sql_post_data[:body].to_s
         summary = sql_post_data[:teaser].to_s
+        permalink = (sql_post_data[:permalink] || "").strip
         tags = (sql_post_data[:tags] || "").downcase.strip
         files = (sql_post_data[:files] || "").strip.split("|")
         audiofiles = (sql_post_data[:audiofiles] || "").strip.split("|")
@@ -49,6 +52,10 @@ EOS
 
         unless files.empty? and audiofiles.empty?
           data["attachments"] = files + audiofiles
+        end
+
+        unless permalink.empty?
+          data["permalink"] = permalink
         end
 
         return data, content
