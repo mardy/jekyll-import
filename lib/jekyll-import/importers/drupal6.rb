@@ -18,11 +18,10 @@ module JekyllImport
                        n.created,
                        n.status,
                        n.type,
-                       GROUP_CONCAT( td.name SEPARATOR '|' ) AS 'tags'
+                       (SELECT GROUP_CONCAT( td.name SEPARATOR '|' ) FROM term_data td, term_node tn WHERE tn.tid = td.tid AND tn.nid = n.nid) AS 'tags',
+                       (SELECT GROUP_CONCAT( fl.filepath SEPARATOR '|' ) FROM files fl WHERE fl.nid = n.nid) AS 'files'
                 FROM #{prefix}node_revisions AS nr,
                      #{prefix}node AS n
-                     LEFT OUTER JOIN #{prefix}term_node AS tn ON tn.nid = n.nid
-                     LEFT OUTER JOIN #{prefix}term_data AS td ON tn.tid = td.tid
                 WHERE (#{types})
                   AND n.vid = nr.vid
                 GROUP BY n.nid
@@ -39,11 +38,16 @@ EOS
         content = sql_post_data[:body].to_s
         summary = sql_post_data[:teaser].to_s
         tags = (sql_post_data[:tags] || "").downcase.strip
+        files = (sql_post_data[:files] || "").strip
 
         data = {
           "excerpt"    => summary,
           "categories" => tags.split("|"),
         }
+
+        unless files.empty?
+          data["attachments"] = files.split("|")
+        end
 
         return data, content
       end
