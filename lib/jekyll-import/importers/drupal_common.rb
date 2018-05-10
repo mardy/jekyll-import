@@ -37,7 +37,6 @@ module JekyllImport
             rubygems
             sequel
             mysql2
-            pg
             fileutils
             safe_yaml
           ))
