@@ -55,7 +55,7 @@ EOS
         end
 
         unless permalink.empty?
-          data["permalink"] = permalink
+          data["permalink"] = permalink + "/"
         end
 
         return data, content
