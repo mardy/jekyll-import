@@ -106,7 +106,7 @@ HTML
             node_id = post[:nid]
             dir = is_published ? dirs[:_posts] : dirs[:_drafts]
             slug = title.strip.downcase.gsub(%r!(&|&amp;)!, " and ").gsub(%r![\s\.\/\\]!, "-").gsub(%r![^\w-]!, "").gsub(%r![-_]{2,}!, "-").gsub(%r!^[-_]!, "").gsub(%r![-_]$!, "")
-            filename = Time.at(time).to_datetime.strftime("%Y-%m-%d-") + slug + ".md"
+            filename = Time.at(time).to_datetime.strftime("%Y-%m-%d-") + slug + ".html"
 
             # Write out the data and content to file
             File.open("#{dir}/#{filename}", "w") do |f|
